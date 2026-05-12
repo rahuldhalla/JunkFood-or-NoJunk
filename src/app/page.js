@@ -38,8 +38,16 @@ const healthyKeywords = [
   'quinoa',
 ];
 
+function normalize(text) {
+  return text.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function matchesKeyword(normalizedInput, keywordList) {
+  return keywordList.some((keyword) => normalizedInput.includes(keyword));
+}
+
 function classifyFood(input) {
-  const normalizedInput = input.trim().toLowerCase();
+  const normalizedInput = normalize(input);
 
   if (!normalizedInput) {
     return {
@@ -49,13 +57,8 @@ function classifyFood(input) {
     };
   }
 
-  const matchesJunk = junkKeywords.some((keyword) =>
-    normalizedInput.includes(keyword),
-  );
-
-  const matchesHealthy = healthyKeywords.some((keyword) =>
-    normalizedInput.includes(keyword),
-  );
+  const matchesJunk = matchesKeyword(normalizedInput, junkKeywords);
+  const matchesHealthy = matchesKeyword(normalizedInput, healthyKeywords);
 
   if (matchesJunk && !matchesHealthy) {
     return {
@@ -82,9 +85,10 @@ function classifyFood(input) {
   };
 }
 
+const examples = ['Pizza', 'Apple', 'Ice cream', 'Brown rice'];
+
 export default function Home() {
   const [food, setFood] = useState('');
-
   const result = useMemo(() => classifyFood(food), [food]);
 
   return (
@@ -108,7 +112,20 @@ export default function Home() {
           className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-base outline-none ring-emerald-500 transition focus:ring-2"
         />
 
-        <div className="mt-6 rounded-lg bg-slate-50 p-4">
+        <div className="mt-3 flex flex-wrap gap-2">
+          {examples.map((example) => (
+            <button
+              key={example}
+              type="button"
+              onClick={() => setFood(example)}
+              className="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100"
+            >
+              {example}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-6 rounded-lg bg-slate-50 p-4" aria-live="polite">
           <p className="text-sm uppercase tracking-wide text-slate-500">Result</p>
           <p className={`mt-1 text-xl font-bold ${result.color}`}>
             {result.label || 'Waiting for input...'}
