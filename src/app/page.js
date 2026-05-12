@@ -52,7 +52,7 @@ function classifyFood(input) {
   if (!normalizedInput) {
     return {
       label: '',
-      message: 'Type a food item to get started.',
+      message: 'Submit details about a food item to get started.',
       color: 'text-slate-600',
     };
   }
@@ -85,50 +85,113 @@ function classifyFood(input) {
   };
 }
 
-const examples = ['Pizza', 'Apple', 'Ice cream', 'Brown rice'];
+const examples = [
+  {
+    food: 'Pizza',
+    description: 'Cheesy slice with pepperoni and white flour crust.',
+    preparation: 'Baked in a hot oven with lots of cheese and processed toppings.',
+  },
+  {
+    food: 'Apple oatmeal bowl',
+    description: 'Oats topped with fresh apples and nuts.',
+    preparation: 'Cooked oats in water and added chopped apple and almonds.',
+  },
+];
 
 export default function Home() {
   const [food, setFood] = useState('');
-  const result = useMemo(() => classifyFood(food), [food]);
+  const [description, setDescription] = useState('');
+  const [preparation, setPreparation] = useState('');
+  const [submittedText, setSubmittedText] = useState('');
+
+  const result = useMemo(() => classifyFood(submittedText), [submittedText]);
+
+  function handleSubmit(event) {
+    event.preventDefault();
+    setSubmittedText(`${food} ${description} ${preparation}`);
+  }
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-center justify-center px-6 py-12">
       <div className="w-full rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="text-3xl font-bold tracking-tight">Junk or No</h1>
         <p className="mt-2 text-slate-600">
-          Enter a food item and this beginner-friendly app will guess if it is junk
-          food or not.
+          Add a food item, a short description, and how it&apos;s made. Then submit to
+          see whether it&apos;s junk food or not.
         </p>
 
-        <label htmlFor="food-input" className="mt-6 block text-sm font-semibold">
-          Food item
-        </label>
-        <input
-          id="food-input"
-          type="text"
-          value={food}
-          onChange={(event) => setFood(event.target.value)}
-          placeholder="Try: pizza, apple, oats, french fries"
-          className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-base outline-none ring-emerald-500 transition focus:ring-2"
-        />
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="food-input" className="mt-6 block text-sm font-semibold">
+            Food item
+          </label>
+          <input
+            id="food-input"
+            type="text"
+            value={food}
+            onChange={(event) => setFood(event.target.value)}
+            placeholder="Try: pizza, apple oatmeal bowl"
+            className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-base outline-none ring-emerald-500 transition focus:ring-2"
+          />
 
-        <div className="mt-3 flex flex-wrap gap-2">
-          {examples.map((example) => (
-            <button
-              key={example}
-              type="button"
-              onClick={() => setFood(example)}
-              className="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100"
-            >
-              {example}
-            </button>
-          ))}
-        </div>
+          <label
+            htmlFor="description-input"
+            className="mt-4 block text-sm font-semibold"
+          >
+            Short description
+          </label>
+          <textarea
+            id="description-input"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            placeholder="Describe the food briefly"
+            rows={3}
+            className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-base outline-none ring-emerald-500 transition focus:ring-2"
+          />
+
+          <label
+            htmlFor="preparation-input"
+            className="mt-4 block text-sm font-semibold"
+          >
+            How it&apos;s made
+          </label>
+          <textarea
+            id="preparation-input"
+            value={preparation}
+            onChange={(event) => setPreparation(event.target.value)}
+            placeholder="How was it prepared?"
+            rows={3}
+            className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 text-base outline-none ring-emerald-500 transition focus:ring-2"
+          />
+
+          <button
+            type="submit"
+            className="mt-5 rounded-lg bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-700"
+          >
+            Check Food
+          </button>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {examples.map((example) => (
+              <button
+                key={example.food}
+                type="button"
+                onClick={() => {
+                  setFood(example.food);
+                  setDescription(example.description);
+                  setPreparation(example.preparation);
+                }}
+                className="rounded-full border border-slate-300 px-3 py-1 text-sm text-slate-700 hover:bg-slate-100"
+              >
+                {example.food}
+              </button>
+            ))}
+          </div>
+        </form>
 
         <div className="mt-6 rounded-lg bg-slate-50 p-4" aria-live="polite">
           <p className="text-sm uppercase tracking-wide text-slate-500">Result</p>
           <p className={`mt-1 text-xl font-bold ${result.color}`}>
-            {result.label || 'Waiting for input...'}
+            {result.label || 'Waiting for submission...'}
           </p>
           <p className="mt-1 text-slate-700">{result.message}</p>
         </div>
